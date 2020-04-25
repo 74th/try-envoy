@@ -1,0 +1,6 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: router/
+    image: gcr.io/nnyn-dev/try-envoy/server:latest

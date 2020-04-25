@@ -1,0 +1,14 @@
+{
+  "yaml.schemaStore.enable": false,
+  "yaml.schemas": {
+    // docker-compose yaml
+    "https://raw.githubusercontent.com/docker/compose/master/compose/config/config_schema_v3.8.json": [
+      "docker-compose.yaml",
+      "docker-compose.yml"
+    ],
+
+    // Kubernetes
+    "Kubernetes": ["manifests/*.yaml"]
+},
+"go.inferGopath": false
+}
