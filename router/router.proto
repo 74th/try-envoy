@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+service Router {
+    rpc Recommend (RouteRequest) returns (RouteResponse) {}
+}
+
+message RouteRequest {
+    repeated GPSPoint gps = 1;
+}
+
+message RouteResponse {
+    repeated int64 Ways = 1;
+}
+
+message GPSPoint {
+    int64 timestamp = 1;
+    double latitude = 2;
+    double lognitude = 3;
+}
