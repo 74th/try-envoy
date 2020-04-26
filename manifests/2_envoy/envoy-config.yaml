@@ -1,0 +1,73 @@
+static_resources:
+  listeners:
+    - address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8083
+      filter_chains:
+        - filters:
+            - name: envoy.http_connection_manager
+              config:
+                access_log:
+                  - name: envoy.file_access_log
+                    config:
+                      path: "/dev/stdout"
+                codec_type: AUTO
+                stat_prefix: ingress_https
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: http
+                      domains:
+                        - "*"
+                      routes:
+                        - match:
+                            prefix: "/router.Router/"
+                          route:
+                            cluster: server
+                http_filters:
+                  - name: envoy.health_check
+                    config:
+                      pass_through_mode: false
+                      headers:
+                        - name: ":path"
+                          exact_match: "/healthz"
+                        - name: "x-envoy-livenessprobe"
+                          exact_match: "healthz"
+                  - name: envoy.router
+                    config: {}
+          # tls_context:
+          #   common_tls_context:
+          #     tls_certificates:
+          #       - certificate_chain:
+          #           filename: "/etc/ssl/envoy/tls.crt"
+          #         private_key:
+          #           filename: "/etc/ssl/envoy/tls.key"
+  clusters:
+    - name: server
+      connect_timeout: 0.5s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: server
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: server
+                      port_value: 8080
+      health_checks:
+        timeout: 1s
+        interval: 10s
+        unhealthy_threshold: 2
+        healthy_threshold: 2
+        grpc_health_check: {}
+admin:
+  access_log_path: "/dev/stdout"
+  address:
+    socket_address:
+      address: 127.0.0.1
+      port_value: 8090

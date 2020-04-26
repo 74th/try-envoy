@@ -1,0 +1,7 @@
+resources:
+  - envoy-deploy.yaml
+  - envoy-service.yaml
+configMapGenerator:
+  - name: envoy-config
+    files:
+      - envoy.yaml=envoy-config.yaml

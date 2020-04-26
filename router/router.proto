@@ -1,5 +1,10 @@
 syntax = "proto3";
 
+/* Goの場合そのままパッケージ名になる */
+/* /router. */
+package router;
+
+/* /router.Router/Recommend */
 service Router {
     rpc Recommend (RouteRequest) returns (RouteResponse) {}
 }

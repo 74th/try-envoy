@@ -8,6 +8,9 @@ import (
 	"net"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/health/grpc_health_v1"
+	"google.golang.org/grpc/status"
 
 	"github.com/74th/try-envoy/router"
 )
@@ -31,10 +34,14 @@ func startService(baseWay int64, addr string) {
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
+
 	s := grpc.NewServer()
-	router.RegisterRouterServer(s, &server{
+	sv := &server{
 		baseWay: baseWay,
-	})
+	}
+	router.RegisterRouterServer(s, sv)
+	grpc_health_v1.RegisterHealthServer(s, sv)
+
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
@@ -50,4 +57,13 @@ func (sv *server) Recommend(ctx context.Context, req *router.RouteRequest) (*rou
 	res := new(router.RouteResponse)
 	res.Ways = ways
 	return res, nil
+}
+
+// copy of https://github.com/GoogleCloudPlatform/grpc-gke-nlb-tutorial/blob/master/echo-grpc/health/health.go
+func (sv *server) Check(ctx context.Context, in *grpc_health_v1.HealthCheckRequest) (*grpc_health_v1.HealthCheckResponse, error) {
+	return &grpc_health_v1.HealthCheckResponse{Status: grpc_health_v1.HealthCheckResponse_SERVING}, nil
+}
+
+func (sv *server) Watch(in *grpc_health_v1.HealthCheckRequest, srv grpc_health_v1.Health_WatchServer) error {
+	return status.Error(codes.Unimplemented, "Watch is not implemented")
 }

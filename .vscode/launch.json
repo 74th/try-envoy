@@ -20,7 +20,7 @@
       "mode": "auto",
       "program": "${workspaceFolder}/router/client/client.go",
       "env": {},
-      "args": ["-H", "localhost:8080"]
+      "args": ["-H", "localhost:30083"]
     }
   ]
 }
