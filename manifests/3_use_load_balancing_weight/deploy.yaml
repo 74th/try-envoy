@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server2
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: server2
+  template:
+    metadata:
+      labels:
+        app: server2
+    spec:
+      containers:
+        - name: server
+          image: gcr.io/nnyn-dev/try-envoy/server@sha256:0fda8720e22912f5a9a405d1045cf4bd92f484e702084e72e7845c71f6a5bc9f
+          command: ["./server", "-b", "10"]
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "100M"
+            limits:
+              cpu: "1"
+              memory: "1G"
