@@ -4,4 +4,4 @@ resources:
 configMapGenerator:
   - name: envoy-config
     files:
-      - envoy.yaml=envoy-config.yaml
+      - envoy.yaml
