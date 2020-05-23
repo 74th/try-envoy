@@ -26,7 +26,7 @@ spec:
           readinessProbe:
             httpGet:
               scheme: HTTP
-              path: /_ah/health
+              path: /
               httpHeaders:
                 - name: x-envoy-livenessprobe
                   value: healthz
@@ -35,7 +35,7 @@ spec:
           livenessProbe:
             httpGet:
               scheme: HTTP
-              path: /_ah/health
+              path: /
               httpHeaders:
                 - name: x-envoy-livenessprobe
                   value: healthz

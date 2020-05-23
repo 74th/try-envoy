@@ -23,8 +23,7 @@ static_resources:
                         - match:
                             prefix: "/router.Router/"
                           route:
-                            # cluster: server
-                            cluster: local_grpc_endpoint
+                            cluster: service
                 http_filters:
                   - name: envoy.lua
                     config:
@@ -32,7 +31,7 @@ static_resources:
                         package.path = "/etc/envoy/lua/?.lua;/usr/share/lua/5.1/nginx/?.lua;/etc/envoy/lua/" .. package.path
                         function envoy_on_request(request_handle)
 
-                          if request_handle:headers():get(":path") == "/_ah/health" then
+                          if request_handle:headers():get(":path") == "/" then
                             local headers, body = request_handle:httpCall(
                             "local_admin",
                             {
@@ -42,7 +41,7 @@ static_resources:
                             },"", 50)
 
                             request_handle:logWarn(body)
-                            str = "local_grpc_endpoint::%d+.%d+.%d+.%d+:%d+::health_flags::healthy"
+                            str = "service::%d+.%d+.%d+.%d+:%d+::health_flags::healthy"
                             if string.match(body, str) then
                               request_handle:respond({[":status"] = "200"},"ok")
                             else
@@ -53,28 +52,7 @@ static_resources:
                   - name: envoy.router
                     config: {}
   clusters:
-    # - name: server
-    #   connect_timeout: 0.5s
-    #   type: STRICT_DNS
-    #   dns_lookup_family: V4_ONLY
-    #   lb_policy: ROUND_ROBIN
-    #   http2_protocol_options: {}
-    #   load_assignment:
-    #     cluster_name: server
-    #     endpoints:
-    #       - lb_endpoints:
-    #           - endpoint:
-    #               address:
-    #                 socket_address:
-    #                   address: server1
-    #                   port_value: 8080
-    #   health_checks:
-    #     timeout: 1s
-    #     interval: 10s
-    #     unhealthy_threshold: 2
-    #     healthy_threshold: 2
-    #     grpc_health_check: {}
-    - name: local_grpc_endpoint
+    - name: service
       connect_timeout: 0.05s
       type: STRICT_DNS
       http2_protocol_options: {}
