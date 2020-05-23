@@ -23,6 +23,8 @@ func init() {
 
 func main() {
 
+	log.Printf("connect to %s", addr)
+
 	conn, err := grpc.Dial(addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)

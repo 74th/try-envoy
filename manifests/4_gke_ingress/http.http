@@ -1,0 +1,6 @@
+###
+GET http://localhost:8083/_ah/health
+x-envoy-livenessprobe: healthz
+
+###
+GET http://localhost:8083/

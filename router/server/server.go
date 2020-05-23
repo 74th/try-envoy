@@ -3,10 +3,15 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
+	"net/http"
+	"strings"
 
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -29,6 +34,10 @@ func main() {
 	startService(baseWay, addr)
 }
 
+func isGrpcRequest(r *http.Request) bool {
+	return r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc")
+}
+
 func startService(baseWay int64, addr string) {
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -39,10 +48,24 @@ func startService(baseWay int64, addr string) {
 	sv := &server{
 		baseWay: baseWay,
 	}
+	http.HandleFunc("/", hchandler)
+	http.HandleFunc("/_ah/health", hchandler)
+
+	muxHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isGrpcRequest(r) {
+			s.ServeHTTP(w, r)
+			return
+		}
+		http.DefaultServeMux.ServeHTTP(w, r)
+	})
+
 	router.RegisterRouterServer(s, sv)
 	grpc_health_v1.RegisterHealthServer(s, sv)
 
-	if err := s.Serve(lis); err != nil {
+	if err := http.Serve(lis, h2c.NewHandler(
+		muxHandler,
+		&http2.Server{},
+	)); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
@@ -66,4 +89,8 @@ func (sv *server) Check(ctx context.Context, in *grpc_health_v1.HealthCheckReque
 
 func (sv *server) Watch(in *grpc_health_v1.HealthCheckRequest, srv grpc_health_v1.Health_WatchServer) error {
 	return status.Error(codes.Unimplemented, "Watch is not implemented")
+}
+
+func hchandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "ok")
 }
