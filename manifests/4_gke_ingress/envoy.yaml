@@ -42,7 +42,7 @@ static_resources:
                             },"", 50)
 
                             request_handle:logWarn(body)
-                            str = "::health_flags::healthy"
+                            str = "local_grpc_endpoint::%d+.%d+.%d+.%d+:%d+::health_flags::healthy"
                             if string.match(body, str) then
                               request_handle:respond({[":status"] = "200"},"ok")
                             else
