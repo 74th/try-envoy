@@ -14,9 +14,14 @@ spec:
     spec:
       containers:
         - name: server
-          image: gcr.io/nnyn-dev/try-envoy/server@sha256:0fda8720e22912f5a9a405d1045cf4bd92f484e702084e72e7845c71f6a5bc9f
+          image: 74th/try-envoy-server:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 443
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              port: 443
+              path: /healthz
           resources:
             requests:
               cpu: "100m"
@@ -25,3 +30,10 @@ spec:
               cpu: "1"
               memory: "1G"
           imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /app/cert
+              name: server1-cert
+      volumes:
+        - name: server1-cert
+          configMap:
+            name: server1-cert

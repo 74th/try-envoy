@@ -1,10 +1,15 @@
+namespace: try-envoy
+bases:
+  - ./envoy_cert
+  - ./server1_cert
 resources:
   - server1-deploy.yaml
   - server1-service.yaml
-  - envoy-deploy.yaml
-  - envoy-service.yaml
-  - envoy-ingress.yaml
-configMapGenerator:
-  - name: envoy-config
-    files:
-      - envoy.yaml
+  # - ingress-cert.yaml
+  # - envoy-deploy.yaml
+  # - envoy-service.yaml
+  # - envoy-ingress.yaml
+# configMapGenerator:
+#   - name: envoy-config
+#     files:
+#    null   - envoy.yaml

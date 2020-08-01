@@ -10,4 +10,4 @@ spec:
   ports:
     - name: server1
       protocol: TCP
-      port: 8080
+      port: 443

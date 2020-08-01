@@ -1,0 +1,5 @@
+configMapGenerator:
+  - name: envy-cert
+    files:
+      - ./cert.pem
+      - ./key.pem
