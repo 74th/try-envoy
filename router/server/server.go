@@ -6,12 +6,9 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"net"
 	"net/http"
 	"strings"
 
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
@@ -20,53 +17,58 @@ import (
 	"github.com/74th/try-envoy/router"
 )
 
+var baseWay int64
+var addr string
+var useTLS bool
+
 type server struct {
 	baseWay int64
 }
 
 func main() {
-	var baseWay int64
-	var addr string
 	flag.Int64Var(&baseWay, "b", 1, "")
 	flag.StringVar(&addr, "H", "0.0.0.0:8080", "")
+	flag.BoolVar(&useTLS, "tls", false, "")
 	flag.Parse()
 
-	startService(baseWay, addr)
+	startService()
 }
 
 func isGrpcRequest(r *http.Request) bool {
 	return r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc")
 }
 
-func startService(baseWay int64, addr string) {
-	lis, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-
+func startService() {
 	s := grpc.NewServer()
 	sv := &server{
 		baseWay: baseWay,
 	}
-	http.HandleFunc("/", hchandler)
-	http.HandleFunc("/_ah/health", hchandler)
 
-	muxHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	router.RegisterRouterServer(s, sv)
+
+	healthCheckMux := http.NewServeMux()
+	healthCheckMux.HandleFunc("/", hchandler)
+	healthCheckMux.HandleFunc("/healthz", hchandler)
+	healthCheckMux.HandleFunc("/_ah/health", hchandler)
+
+	httpMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isGrpcRequest(r) {
 			s.ServeHTTP(w, r)
 			return
 		}
-		http.DefaultServeMux.ServeHTTP(w, r)
+		healthCheckMux.ServeHTTP(w, r)
 	})
 
-	router.RegisterRouterServer(s, sv)
-	grpc_health_v1.RegisterHealthServer(s, sv)
-
-	if err := http.Serve(lis, h2c.NewHandler(
-		muxHandler,
-		&http2.Server{},
-	)); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	if useTLS {
+		err := http.ListenAndServeTLS(addr, "./cert/cert.pem", "./cert/key.pem", httpMux)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+	} else {
+		err := http.ListenAndServe(addr, httpMux)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
 	}
 }
 
