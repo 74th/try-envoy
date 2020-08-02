@@ -14,15 +14,29 @@
       "args": []
     },
     {
+      "name": "server tls",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/router/server/server.go",
+      "cwd": "${workspaceFolder}/router/server",
+      "env": {},
+      "args": ["-H", ":8443", "-tls"]
+    },
+    {
       "name": "client",
       "type": "go",
       "request": "launch",
       "mode": "auto",
+      "cwd": "${workspaceFolder}/router/client",
       "program": "${workspaceFolder}/router/client/client.go",
-      "env": {},
       // "args": ["-H", "localhost:30084"]
-      "args": ["-H", "localhost:8083"]
-      // "args": ["-H", "localhost:8080"]
+      // "args": ["-H", "localhost:8083"]
+      // "args": ["-H", "temp20200505.74th.tech:443"]
+      // "args": ["-H", "localhost:50000"]
+      // "args": ["-tls", "-H", "server1:8443"]
+      "args": ["-H", "localhost:8080"]
+      // "args": ["-H", "localhost:8443", "-tls"]
     }
   ]
 }

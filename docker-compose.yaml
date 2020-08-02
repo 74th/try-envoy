@@ -3,4 +3,4 @@ services:
   app:
     build:
       context: router/
-    image: gcr.io/nnyn-dev/try-envoy/server:latest
+    image: 74th/try-envoy-server:latest

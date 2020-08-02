@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
-	"strings"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -27,7 +27,7 @@ type server struct {
 
 func main() {
 	flag.Int64Var(&baseWay, "b", 1, "")
-	flag.StringVar(&addr, "H", "0.0.0.0:8080", "")
+	flag.StringVar(&addr, "H", ":8080", "")
 	flag.BoolVar(&useTLS, "tls", false, "")
 	flag.Parse()
 
@@ -35,37 +35,48 @@ func main() {
 }
 
 func isGrpcRequest(r *http.Request) bool {
-	return r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("Content-Type"), "application/grpc")
+	return r.ProtoMajor == 2 && r.Method == "PRI" && r.RequestURI == "*"
 }
 
 func startService() {
-	s := grpc.NewServer()
-	sv := &server{
-		baseWay: baseWay,
-	}
-
-	router.RegisterRouterServer(s, sv)
 
 	healthCheckMux := http.NewServeMux()
-	healthCheckMux.HandleFunc("/", hchandler)
-	healthCheckMux.HandleFunc("/healthz", hchandler)
-	healthCheckMux.HandleFunc("/_ah/health", hchandler)
+	healthCheckMux.HandleFunc("/", hcHandler)
+	healthCheckMux.HandleFunc("/healthz", hcHandler)
+	healthCheckMux.HandleFunc("/_ah/health", hcHandler)
 
-	httpMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if isGrpcRequest(r) {
-			s.ServeHTTP(w, r)
-			return
-		}
-		healthCheckMux.ServeHTTP(w, r)
-	})
+	// httpMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	// 	if isGrpcRequest(r) {
+	// 		s.ServeHTTP(w, r)
+	// 		return
+	// 	}
+	// 	healthCheckMux.ServeHTTP(w, r)
+	// })
+
+	// gRPC サーバ
+	s := grpc.NewServer()
+	sv := &server{baseWay: baseWay}
+	router.RegisterRouterServer(s, sv)
 
 	if useTLS {
-		err := http.ListenAndServeTLS(addr, "./cert/cert.pem", "./cert/key.pem", httpMux)
+		// TLS なら http を介して動く
+		err := http.ListenAndServeTLS(addr, "./cert/cert.pem", "./cert/key.pem", s)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
 	} else {
-		err := http.ListenAndServe(addr, httpMux)
+		// 非TLS の場合、http を介して動作しない
+		// err := http.ListenAndServe(addr, s)
+		// if err != nil {
+		// 	log.Fatalf("failed to listen: %v", err)
+		// }
+
+		// 非TLSの場合、Lister直なら動いた
+		lis, err := net.Listen("tcp", addr)
+		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+		err = s.Serve(lis)
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
@@ -93,6 +104,6 @@ func (sv *server) Watch(in *grpc_health_v1.HealthCheckRequest, srv grpc_health_v
 	return status.Error(codes.Unimplemented, "Watch is not implemented")
 }
 
-func hchandler(w http.ResponseWriter, r *http.Request) {
+func hcHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
 }
