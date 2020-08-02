@@ -1,5 +1,0 @@
-configMapGenerator:
-  - name: server1-cert
-    files:
-      - ./cert.pem
-      - ./key.pem

@@ -90,19 +90,6 @@ static_resources:
                     socket_address:
                       address: server1
                       port_value: 50000
-      # transport_socket:
-      #   name: envoy.transport_sockets.tls
-      #   typed_config:
-      #     "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
-      #     common_tls_context:
-      #       tls_certificates:
-      #         certificate_chain: { "filename": "/etc/ssl/envoy/cert.pem" }
-      #         private_key: { "filename": "/etc/ssl/envoy/key.pem" }
-      #       validation_context:
-      #         match_subject_alt_names:
-      #           exact: "foo"
-      #         trusted_ca:
-      #             filename: /etc/ssl/certs/ca-certificates.crt
     - name: local_admin
       connect_timeout: 0.05s
       type: STATIC

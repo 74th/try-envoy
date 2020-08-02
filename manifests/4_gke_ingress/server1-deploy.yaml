@@ -32,10 +32,3 @@ spec:
               cpu: "1"
               memory: "1G"
           imagePullPolicy: Always
-          volumeMounts:
-            - mountPath: /app/cert
-              name: server1-cert
-      volumes:
-        - name: server1-cert
-          configMap:
-            name: server1-cert

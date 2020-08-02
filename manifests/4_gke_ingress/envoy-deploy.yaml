@@ -55,6 +55,3 @@ spec:
         - name: cert
           configMap:
             name: envoy-cert
-        # - name: certs
-        #   secret:
-        #     secretName: envoy-certs
