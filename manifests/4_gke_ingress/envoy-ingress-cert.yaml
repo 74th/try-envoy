@@ -1,7 +1,7 @@
 apiVersion: networking.gke.io/v1beta2
 kind: ManagedCertificate
 metadata:
-  name: my-ingress-cert
+  name: try-envoy-cert
 spec:
   domains:
-    - temp20200505.74th.tech
+    - temp20200801.74th.tech

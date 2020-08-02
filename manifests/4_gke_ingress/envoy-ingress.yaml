@@ -1,12 +1,11 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: my-ingress
+  name: try-envoy
   annotations:
     kubernetes.io/ingress.allow-http: "false"
     kubernetes.io/ingress.global-static-ip-name: try-envoy-ip
     networking.gke.io/managed-certificates: try-envoy-cert
-    cloud.google.com/app-protocols: '{"envoy":"HTTP2"}'
 spec:
   backend:
     serviceName: envoy

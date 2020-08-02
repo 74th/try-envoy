@@ -34,9 +34,11 @@
       // "args": ["-H", "localhost:8083"]
       // "args": ["-H", "temp20200505.74th.tech:443"]
       // "args": ["-H", "localhost:50000"]
-      // "args": ["-tls", "-H", "server1:8443"]
-      "args": ["-H", "localhost:8080"]
+      // "args": ["-tls", "-H", "server1  :8443"]
+      // "args": ["-H", "localhost:8080"]
       // "args": ["-H", "localhost:8443", "-tls"]
+      // "args": ["-H", "envoy:8443", "-tls"]
+      "args": ["-H", "temp20200801.74th.tech:443", "-tls"]
     }
   ]
 }
