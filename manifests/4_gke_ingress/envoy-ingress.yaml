@@ -3,16 +3,18 @@ kind: Ingress
 metadata:
   name: my-ingress
   annotations:
+    kubernetes.io/ingress.allow-http: "false"
     kubernetes.io/ingress.global-static-ip-name: try-envoy-ip
     networking.gke.io/managed-certificates: try-envoy-cert
+    cloud.google.com/app-protocols: '{"envoy":"HTTP2"}'
 spec:
   backend:
     serviceName: envoy
-    servicePort: 8083
+    servicePort: 443
   rules:
     - http:
         paths:
           - path: /*
             backend:
               serviceName: envoy
-              servicePort: 8083
+              servicePort: 443

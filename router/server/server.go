@@ -45,18 +45,11 @@ func startService() {
 	healthCheckMux.HandleFunc("/healthz", hcHandler)
 	healthCheckMux.HandleFunc("/_ah/health", hcHandler)
 
-	// httpMux := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	if isGrpcRequest(r) {
-	// 		s.ServeHTTP(w, r)
-	// 		return
-	// 	}
-	// 	healthCheckMux.ServeHTTP(w, r)
-	// })
-
 	// gRPC サーバ
 	s := grpc.NewServer()
 	sv := &server{baseWay: baseWay}
 	router.RegisterRouterServer(s, sv)
+	grpc_health_v1.RegisterHealthServer(s, sv)
 
 	if useTLS {
 		// TLS なら http を介して動く

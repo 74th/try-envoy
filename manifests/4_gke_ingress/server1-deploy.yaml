@@ -16,12 +16,14 @@ spec:
         - name: server
           image: 74th/try-envoy-server:latest
           ports:
-            - containerPort: 443
+            - containerPort: 50000
+          command:
+            - ./server
+            - -H
+            - :50000
           readinessProbe:
-            httpGet:
-              scheme: HTTPS
-              port: 443
-              path: /healthz
+            tcpSocket:
+              port: 50000
           resources:
             requests:
               cpu: "100m"

@@ -3,7 +3,7 @@ static_resources:
     - address:
         socket_address:
           address: 0.0.0.0
-          port_value: 8083
+          port_value: 443
       filter_chains:
         - filters:
             - name: envoy.http_connection_manager
@@ -51,6 +51,14 @@ static_resources:
                         end
                   - name: envoy.router
                     config: {}
+          tls_context:
+            common_tls_context:
+              alpn_protocols: h2
+              tls_certificates:
+                - certificate_chain:
+                    filename: "/etc/ssl/envoy/cert.pem"
+                  private_key:
+                    filename: "/etc/ssl/envoy/key.pem"
   clusters:
     - name: service
       connect_timeout: 0.05s
@@ -69,7 +77,6 @@ static_resources:
           healthy_threshold: 3
           grpc_health_check:
             service_name: "route.Router"
-            authority: "server.domain.com"
       hosts:
         - socket_address:
             address: 127.0.0.1
@@ -82,7 +89,20 @@ static_resources:
                   address:
                     socket_address:
                       address: server1
-                      port_value: 8080
+                      port_value: 50000
+      # transport_socket:
+      #   name: envoy.transport_sockets.tls
+      #   typed_config:
+      #     "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+      #     common_tls_context:
+      #       tls_certificates:
+      #         certificate_chain: { "filename": "/etc/ssl/envoy/cert.pem" }
+      #         private_key: { "filename": "/etc/ssl/envoy/key.pem" }
+      #       validation_context:
+      #         match_subject_alt_names:
+      #           exact: "foo"
+      #         trusted_ca:
+      #             filename: /etc/ssl/certs/ca-certificates.crt
     - name: local_admin
       connect_timeout: 0.05s
       type: STATIC

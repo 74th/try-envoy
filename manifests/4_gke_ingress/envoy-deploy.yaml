@@ -17,29 +17,29 @@ spec:
           image: envoyproxy/envoy-alpine:v1.14.1
           ports:
             - name: http
-              containerPort: 8083
+              containerPort: 443
           volumeMounts:
             - name: config
               mountPath: /etc/envoy
-          #   - name: certs
-          #     mountPath: /etc/ssl/envoy
+            - name: cert
+              mountPath: /etc/ssl/envoy
           readinessProbe:
             httpGet:
-              scheme: HTTP
+              scheme: HTTPS
               path: /
               httpHeaders:
                 - name: x-envoy-livenessprobe
                   value: healthz
-              port: 8083
+              port: 443
             initialDelaySeconds: 3
           livenessProbe:
             httpGet:
-              scheme: HTTP
+              scheme: HTTPS
               path: /
               httpHeaders:
                 - name: x-envoy-livenessprobe
                   value: healthz
-              port: 8083
+              port: 443
             initialDelaySeconds: 10
           resources:
             requests:
@@ -52,6 +52,9 @@ spec:
         - name: config
           configMap:
             name: envoy-config
+        - name: cert
+          configMap:
+            name: envoy-cert
         # - name: certs
         #   secret:
         #     secretName: envoy-certs

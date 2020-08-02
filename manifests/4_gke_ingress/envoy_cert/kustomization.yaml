@@ -1,5 +1,5 @@
 configMapGenerator:
-  - name: envy-cert
+  - name: envoy-cert
     files:
       - ./cert.pem
       - ./key.pem
